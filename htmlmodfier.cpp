@@ -9,18 +9,38 @@
 #include <QDir>
 #include <QTextCursor>
 
+const QString HtmlModifier::replacingString = "30fb;";  //KATAKANA MIDDLE DOT
+
 HtmlModifier::HtmlModifier()
 {
 }
 
-QString HtmlModifier::addImages(const QString &htmlString)
+QString HtmlModifier::normalizeHtml(const QString &htmlString)
 {
-//    qDebug() << htmlString;
-    QTextDocument srcDoc;
-    srcDoc.setHtml(htmlString);
-    QTextBlock currentBlock = srcDoc.begin();
+    textDocument.setHtml(htmlString);
+    modifyImagePath();
+    modifyText();
+    return textDocument.toHtml();
+}
+
+void HtmlModifier::modifyText()
+{
+    QTextCursor cursor(&textDocument);
+    for (cursor = textDocument.find(replacingString, cursor); !cursor.isNull() && !cursor.atEnd();
+         cursor = textDocument.find(replacingString, cursor))
+    {
+        cursor.setPosition(cursor.position() + replacingString.length(), QTextCursor::KeepAnchor);
+        cursor.insertText(QString(QChar(0x30FB)));
+    }
+}
+
+void HtmlModifier::modifyImagePath()
+{
+//    qDebug() << htmlString;    
+    QTextBlock currentBlock = textDocument.begin();
     for (; currentBlock.isValid(); currentBlock = currentBlock.next())
     {
+        qDebug() << "Block";
         QTextBlock::Iterator iter;
         for (iter = currentBlock.begin(); iter != currentBlock.end(); ++iter)
         {
@@ -39,7 +59,7 @@ QString HtmlModifier::addImages(const QString &htmlString)
                 if (fileInfo.exists())
                 {
                     imageFormat.setName(fileInfo.absoluteFilePath());
-                    QTextCursor cursor(&srcDoc);
+                    QTextCursor cursor(&textDocument);
                     cursor.setPosition(currentFragment.position());
                     cursor.setPosition(currentFragment.position() + currentFragment.length(), QTextCursor::KeepAnchor);
                     cursor.setCharFormat(imageFormat);
@@ -48,5 +68,4 @@ QString HtmlModifier::addImages(const QString &htmlString)
             }
         }
     }
-    return srcDoc.toHtml();
 }

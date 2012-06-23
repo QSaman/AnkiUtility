@@ -11,9 +11,7 @@ DictionaryTextEdit::DictionaryTextEdit(QWidget *parent) :
 void DictionaryTextEdit::insertFromMimeData(const QMimeData * source)
 {
     if (source->hasHtml())
-    {
-        setText(htmlModifier.addImages(source->html()));
-    }
+        setText(htmlModifier.normalizeHtml(source->html()));
     else
         QTextEdit::insertFromMimeData(source);
 }
