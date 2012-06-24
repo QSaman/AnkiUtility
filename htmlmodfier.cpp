@@ -8,6 +8,9 @@
 #include <QTextImageFormat>
 #include <QDir>
 #include <QTextCursor>
+#include <QTextDocumentFragment>
+
+#define var(x) #x << ": " << x
 
 const QString HtmlModifier::replacingString = "30fb;";  //KATAKANA MIDDLE DOT
 
@@ -34,13 +37,23 @@ void HtmlModifier::modifyText()
     }
 }
 
-void HtmlModifier::modifyImagePath()
+bool HtmlModifier::DeleteImages(QTextCursor &textCursor)
+{
+    if (!textCursor.hasSelection())
+        return false;
+    textDocument.setHtml(textCursor.selection().toHtml());
+    modifyImagePath(true);
+    textCursor.insertHtml(textDocument.toHtml());
+    return true;
+}
+
+void HtmlModifier::modifyImagePath(bool removeImages)
 {
 //    qDebug() << htmlString;    
     QTextBlock currentBlock = textDocument.begin();
     for (; currentBlock.isValid(); currentBlock = currentBlock.next())
     {
-        qDebug() << "Block";
+        //qDebug() << "Block";
         QTextBlock::Iterator iter;
         for (iter = currentBlock.begin(); iter != currentBlock.end(); ++iter)
         {
@@ -51,6 +64,8 @@ void HtmlModifier::modifyImagePath()
             if (!imageFormat.isValid())
                 continue;
             QString imageName = QFileInfo(imageFormat.name()).fileName();
+            QString imageValue = XmlBasedSettings::imageValue(imageName);
+            qDebug() << var(imageValue);
             QList<QString> listString = XmlBasedSettings::resourcePathList();
             for (int i = 0; i < listString.count(); ++i)
             {
@@ -62,7 +77,17 @@ void HtmlModifier::modifyImagePath()
                     QTextCursor cursor(&textDocument);
                     cursor.setPosition(currentFragment.position());
                     cursor.setPosition(currentFragment.position() + currentFragment.length(), QTextCursor::KeepAnchor);
-                    cursor.setCharFormat(imageFormat);
+                    if (removeImages && imageValue != "")
+                    {
+                        qDebug() << var(imageName) << " - " << var(imageValue);
+                        //cursor.removeSelectedText();
+                        if (imageValue == "bullet")
+                            cursor.insertText(replacingString);
+                        else
+                            cursor.insertText(imageValue);
+                    }
+                    else
+                        cursor.setCharFormat(imageFormat);
                     break;
                 }
             }

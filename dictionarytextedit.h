@@ -15,8 +15,13 @@ protected:
 signals:
     
 public slots:
+    void copy();
+    void cut();
+    void copyImages(bool copy);
+    void deleteImages();
 private:
     HtmlModifier htmlModifier;
+    bool m_copyImage;
     
 };
 

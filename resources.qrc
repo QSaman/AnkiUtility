@@ -2,5 +2,6 @@
     <qresource prefix="/">
         <file>Resources/Images/1340368690_iPhoto.png</file>
         <file>Resources/XMLs/DictionaryResources.xml</file>
+        <file>Resources/Images/Delete-icon.png</file>
     </qresource>
 </RCC>

@@ -4,14 +4,16 @@
 #include <QTextDocument>
 
 class QString;
+class QTextCursor;
 
 class HtmlModifier
 {
 public:
     HtmlModifier();
     QString normalizeHtml(const QString & htmlString);
+    bool DeleteImages(QTextCursor & textCursor);
 private:
-    void modifyImagePath();
+    void modifyImagePath(bool removeImages = false);
     void modifyText();
 
     QTextDocument textDocument;

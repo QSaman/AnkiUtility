@@ -31,8 +31,8 @@ const QString & XmlBasedSettings::imageName(const QString &imageValue, int dicti
     if (dictionaryIndex != -1)
         return _dictionaries[dictionaryIndex].imageName(imageValue);
     for (int i = 0; i < _dictionaries.count(); ++i)
-        if (_dictionaries[dictionaryIndex].imageName(imageValue) != "")
-            return _dictionaries[dictionaryIndex].imageName(imageValue);
+        if (_dictionaries[i].imageName(imageValue) != "")
+            return _dictionaries[i].imageName(imageValue);
     return _emptyString;
 }
 
@@ -41,8 +41,8 @@ const QString & XmlBasedSettings::imageValue(const QString &imageName, int dicti
     if (dictionaryIndex != -1)
         return _dictionaries[dictionaryIndex].imageValue(imageName);
     for (int i = 0; i < _dictionaries.count(); ++i)
-        if (_dictionaries[dictionaryIndex].imageValue(imageName) != "")
-            return _dictionaries[dictionaryIndex].imageValue(imageName);
+        if (_dictionaries[i].imageValue(imageName) != "")
+            return _dictionaries[i].imageValue(imageName);
     return _emptyString;
 }
 

@@ -40,6 +40,7 @@
      <string>&amp;Tools</string>
     </property>
     <addaction name="action_Save"/>
+    <addaction name="actionDeleteImages"/>
    </widget>
    <widget class="QMenu" name="menu_Help">
     <property name="title">
@@ -67,16 +68,20 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
-   <addaction name="actionDelete_Images"/>
+   <addaction name="actionCopyImages"/>
+   <addaction name="actionDeleteImages"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
-  <action name="actionDelete_Images">
+  <action name="actionCopyImages">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="icon">
     <iconset resource="resources.qrc">
      <normaloff>:/Resources/Images/1340368690_iPhoto.png</normaloff>:/Resources/Images/1340368690_iPhoto.png</iconset>
    </property>
    <property name="text">
-    <string>Delete Images</string>
+    <string>Copy Images</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+R</string>
@@ -90,6 +95,15 @@
   <action name="actionAbout_Qt">
    <property name="text">
     <string>About Qt</string>
+   </property>
+  </action>
+  <action name="actionDeleteImages">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/Resources/Images/Delete-icon.png</normaloff>:/Resources/Images/Delete-icon.png</iconset>
+   </property>
+   <property name="text">
+    <string>Delete Images</string>
    </property>
   </action>
  </widget>
