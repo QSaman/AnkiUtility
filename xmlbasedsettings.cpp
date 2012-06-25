@@ -13,8 +13,8 @@ const QString errorMsg = "I expect %1 instead of %2 in line %3 in file %4";
 QList<XmlBasedSettings::Dictionary> XmlBasedSettings::_dictionaries;
 const QString XmlBasedSettings::_emptyString = "";
 
-XmlBasedSettings::Dictionary::Dictionary(QString dictionaryName, QString resourcePath, QMap<QString, QString> fileValue, QMap<QString, QString> fileName) :
-    _dicName(dictionaryName), _resourcePath(resourcePath), _fileValue(fileValue), _fileName(fileName)
+XmlBasedSettings::Dictionary::Dictionary(const QString & dictionaryName, const QString & resourcePath, const QMap<QString, QString> &fileValue, const QMap<QString, int> &fileFormatIndex, const QList<QString> & formatList) :
+    _dicName(dictionaryName), _resourcePath(resourcePath), _fileValue(fileValue),_fileFormatIndex(fileFormatIndex), _formatList(formatList)
 {
 }
 
@@ -26,17 +26,17 @@ QList<QString> XmlBasedSettings::resourcePathList()
     return ret;
 }
 
-const QString & XmlBasedSettings::imageName(const QString &imageValue, int dictionaryIndex)
-{
-    if (dictionaryIndex != -1)
-        return _dictionaries[dictionaryIndex].imageName(imageValue);
-    for (int i = 0; i < _dictionaries.count(); ++i)
-        if (_dictionaries[i].imageName(imageValue) != "")
-            return _dictionaries[i].imageName(imageValue);
-    return _emptyString;
-}
+//const QString & XmlBasedSettings::imageName(const QString &imageValue, int dictionaryIndex)
+//{
+//    if (dictionaryIndex != -1)
+//        return _dictionaries[dictionaryIndex].imageName(imageValue);
+//    for (int i = 0; i < _dictionaries.count(); ++i)
+//        if (_dictionaries[i].imageName(imageValue) != "")
+//            return _dictionaries[i].imageName(imageValue);
+//    return _emptyString;
+//}
 
-const QString & XmlBasedSettings::imageValue(const QString &imageName, int dictionaryIndex)
+const QString XmlBasedSettings::imageValue(const QString &imageName, int dictionaryIndex)
 {
     if (dictionaryIndex != -1)
         return _dictionaries[dictionaryIndex].imageValue(imageName);
@@ -44,6 +44,14 @@ const QString & XmlBasedSettings::imageValue(const QString &imageName, int dicti
         if (_dictionaries[i].imageValue(imageName) != "")
             return _dictionaries[i].imageValue(imageName);
     return _emptyString;
+}
+
+const QString XmlBasedSettings::Dictionary::imageValue(const QString &imageName)
+{
+    QString format = _formatList[_fileFormatIndex[imageName]];
+    if (format.indexOf('%') == -1)
+        return format;
+    return (_fileValue.contains(imageName) ? format.arg(_fileValue[imageName]) : _emptyString);
 }
 
 XmlBasedSettings::XmlBasedSettings()
@@ -79,13 +87,16 @@ bool XmlBasedSettings::loadXmlBasedSettings()
         if (xsr.name() == "dictionaries")
             continue;
         QString dictionaryName, resourcePath;
-        QMap<QString, QString> fileName, fileValue;
-        for (int i = 0; i < 3; ++i)
+        QMap<QString, QString> fileValue;
+        QMap<QString, int> fileFormatIndex;
+        QList<QString> formatList;
+        for (int i = 0; i < 4; ++i)
         {
-            xsr.readNextStartElement(); //<name> or <resource_path> or <image_collection>
-            if (!xsr.isStartElement() || (xsr.name() != "name" && xsr.name() != "resource_path" && xsr.name() != "image_collection"))
+            xsr.readNextStartElement(); //<name> or <resource_path> or <image_collection> or <format_collection>
+            if (!xsr.isStartElement() || (xsr.name() != "name" && xsr.name() != "resource_path" && xsr.name() != "image_collection"
+                                          && xsr.name() != "format_collection"))
             {
-                QMessageBox::critical(0, errorTitle, parsingXmlErrorMsg(errorMsg.arg("<name> or <resource_path> or <image_collection>"), xsr));
+                QMessageBox::critical(0, errorTitle, parsingXmlErrorMsg(errorMsg.arg("<name> or <resource_path> or <image_collection> or <format_collection>"), xsr));
                 return false;
             }
             if (xsr.name() == "name")
@@ -100,18 +111,38 @@ bool XmlBasedSettings::loadXmlBasedSettings()
             }
             else if (xsr.name() == "image_collection")
             {
-                if (!readImageCollectionTag(xsr, fileValue, fileName))
+                if (!readImageCollectionTag(xsr, fileValue, fileFormatIndex))
+                    return false;
+            }
+            else if (xsr.name() == "format_collection")
+            {
+                if (!readFormatCollectionTag(xsr, formatList))
                     return false;
             }
         }
-        _dictionaries.push_back(Dictionary(dictionaryName, resourcePath, fileValue, fileName));
+        _dictionaries.push_back(Dictionary(dictionaryName, resourcePath, fileValue, fileFormatIndex, formatList));
         xsr.readNextStartElement(); //</dictionary>
     }
     //qDebug() << vard(xsr.name()) << " " << vard(xsr.tokenString());
     return true;
 }
 
-bool XmlBasedSettings::readImageCollectionTag(QXmlStreamReader &xsr, QMap<QString, QString> &fileValue, QMap<QString, QString> &fileName)
+bool XmlBasedSettings::readFormatCollectionTag(QXmlStreamReader &xsr, QList<QString> &formatList)
+{
+    for (xsr.readNextStartElement(); xsr.name() != "format_collection" || !xsr.isEndElement(); xsr.readNextStartElement())
+    {
+        if (!xsr.isStartElement() || xsr.name() != "format")
+        {
+            QMessageBox::critical(0, errorTitle, parsingXmlErrorMsg(errorMsg.arg("<format>"), xsr));
+            return false;
+        }
+        QString value = xsr.readElementText();    //</format>
+        formatList.push_back(value);
+    }
+    return true;
+}
+
+bool XmlBasedSettings::readImageCollectionTag(QXmlStreamReader &xsr, QMap<QString, QString> &fileValue, QMap<QString, int> &fileFormatIndex)
 {
     for (xsr.readNextStartElement(); xsr.name() != "image_collection" || !xsr.isEndElement(); xsr.readNextStartElement())
     {
@@ -120,6 +151,20 @@ bool XmlBasedSettings::readImageCollectionTag(QXmlStreamReader &xsr, QMap<QStrin
             QMessageBox::critical(0, errorTitle, parsingXmlErrorMsg(errorMsg.arg("<image>"), xsr));
             return false;
         }
+        int formatInd = 0;
+        if (xsr.attributes().hasAttribute("format_id"))
+        {
+            bool ok = true;
+            QString value = xsr.attributes().value("format_id").toString();
+            formatInd = value.toInt(&ok);
+            if (!ok)
+            {
+                QMessageBox::critical(0, "Invalid Data", QString("Can't convert %1 to int in format_id attribute in line %2").arg(value).arg(xsr.lineNumber()));
+                return false;
+            }
+        }
+        else
+            formatInd = 0;
         QString imageName, imageValue;
         for (int i = 0; i < 2; ++i)
         {
@@ -139,7 +184,8 @@ bool XmlBasedSettings::readImageCollectionTag(QXmlStreamReader &xsr, QMap<QStrin
         }
         //qDebug() << vard(imageValue) << " " << vard(imageName) << endl;
         fileValue[imageName] = imageValue;
-        fileName[imageValue] = imageName;
+        fileFormatIndex[imageName] = formatInd;
+        //fileName[imageValue] = imageName;
         xsr.readNextStartElement(); //</image>
     }
     //qDebug() << "****************************************" << endl;
