@@ -41,7 +41,6 @@ bool HtmlModifier::DeleteImages(QTextCursor &textCursor)
 {
     if (!textCursor.hasSelection())
         return false;
-    textDocument.clear();
     textDocument.setHtml(textCursor.selection().toHtml());
     modifyImagePath(true);
     textCursor.insertHtml(textDocument.toHtml());
