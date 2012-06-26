@@ -8,5 +8,8 @@
         <file>Resources/Images/paste.png</file>
         <file>Resources/Images/qtcreator_logo_512.png</file>
         <file>Resources/Images/Button-Close-icon.png</file>
+        <file>Resources/Images/zoom_in.png</file>
+        <file>Resources/Images/zoom_out.png</file>
+        <file>Resources/Images/search.png</file>
     </qresource>
 </RCC>

@@ -11,9 +11,11 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->actionQuit, SIGNAL(triggered()), qApp, SLOT(quit()));
     connect(ui->actionCopyImages, SIGNAL(toggled(bool)), ui->textEdit, SLOT(copyImages(bool)));
     connect(ui->actionDeleteImages, SIGNAL(triggered()), ui->textEdit, SLOT(deleteImages()));
-    ui->textEdit->populateEditToolBar(ui->editToolBar);
+    ui->textEdit->populateEditWidget(ui->editToolBar);
     ui->editToolBar->setIconSize(QSize(40, 40));
-    ui->textEdit->populateEditToolBar(ui->menu_Edit);
+    ui->textEdit->populateEditWidget(ui->menu_Edit);
+    ui->textEdit->populateFontWidget(ui->fontToolBar);
+    ui->fontToolBar->setIconSize(QSize(30, 30));
 }
 
 MainWindow::~MainWindow()

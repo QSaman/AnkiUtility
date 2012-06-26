@@ -16,7 +16,8 @@ class DictionaryTextEdit : public QTextEdit
     Q_OBJECT
 public:
     explicit DictionaryTextEdit(QWidget *parent = 0);
-    void populateEditToolBar(QWidget * widget);
+    void populateEditWidget(QWidget * widget);
+    void populateFontWidget(QWidget * widget);
 protected:
     void insertFromMimeData(const QMimeData * source);
     void contextMenuEvent(QContextMenuEvent *e);
@@ -50,10 +51,17 @@ private:
 
     HtmlModifier htmlModifier;
     bool m_copyImage;
+
     QAction * copyAction;
     QAction * cutAction;
     QAction * pasteAction;
-    QList<QAction *> _actionList;
+    QList<QAction *> _editActionsList;
+
+    QAction * zoomInAction;
+    QAction * zoomOutAction;
+    QAction * defaultSizeAction;
+    QList<QAction *> _fontActionsList;
+
     TextEditState textEditState;
 };
 
