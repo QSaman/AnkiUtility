@@ -5,5 +5,8 @@
         <file>Resources/Images/Delete-icon.png</file>
         <file>Resources/Images/copy.png</file>
         <file>Resources/Images/cut.png</file>
+        <file>Resources/Images/paste.png</file>
+        <file>Resources/Images/qtcreator_logo_512.png</file>
+        <file>Resources/Images/Button-Close-icon.png</file>
     </qresource>
 </RCC>

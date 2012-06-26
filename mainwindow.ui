@@ -34,12 +34,14 @@
      <string>&amp;File</string>
     </property>
     <addaction name="action_Save"/>
+    <addaction name="separator"/>
+    <addaction name="actionQuit"/>
    </widget>
    <widget class="QMenu" name="menu_Tools">
     <property name="title">
      <string>&amp;Tools</string>
     </property>
-    <addaction name="action_Save"/>
+    <addaction name="actionCopyImages"/>
     <addaction name="actionDeleteImages"/>
    </widget>
    <widget class="QMenu" name="menu_Help">
@@ -48,7 +50,13 @@
     </property>
     <addaction name="actionAbout_Qt"/>
    </widget>
+   <widget class="QMenu" name="menu_Edit">
+    <property name="title">
+     <string>&amp;Edit</string>
+    </property>
+   </widget>
    <addaction name="menu_File"/>
+   <addaction name="menu_Edit"/>
    <addaction name="menu_Tools"/>
    <addaction name="menu_Help"/>
   </widget>
@@ -104,8 +112,12 @@
    </property>
   </action>
   <action name="actionAbout_Qt">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/Resources/Images/qtcreator_logo_512.png</normaloff>:/Resources/Images/qtcreator_logo_512.png</iconset>
+   </property>
    <property name="text">
-    <string>About Qt</string>
+    <string>About Qt...</string>
    </property>
   </action>
   <action name="actionDeleteImages">
@@ -115,6 +127,21 @@
    </property>
    <property name="text">
     <string>Delete Images</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+R</string>
+   </property>
+  </action>
+  <action name="actionQuit">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/Resources/Images/Button-Close-icon.png</normaloff>:/Resources/Images/Button-Close-icon.png</iconset>
+   </property>
+   <property name="text">
+    <string>Quit</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Q</string>
    </property>
   </action>
  </widget>

@@ -7,16 +7,19 @@
 #include <QString>
 
 class QAction;
-class QToolBar;
+class QWidget;
+class QKeyEvent;
+class QContextMenuEvent;
 
 class DictionaryTextEdit : public QTextEdit
 {
     Q_OBJECT
 public:
     explicit DictionaryTextEdit(QWidget *parent = 0);
-    void populateEditToolBar(QToolBar * editToolBar);
+    void populateEditToolBar(QWidget * widget);
 protected:
     void insertFromMimeData(const QMimeData * source);
+    void contextMenuEvent(QContextMenuEvent *e);
     
 signals:
     
@@ -25,6 +28,10 @@ public slots:
     void cut();
     void copyImages(bool copy);
     void deleteImages();
+    void clipboardDataChanged();
+
+protected:
+    void keyPressEvent(QKeyEvent *e);
 
 private:
     class TextEditState
@@ -45,6 +52,7 @@ private:
     bool m_copyImage;
     QAction * copyAction;
     QAction * cutAction;
+    QAction * pasteAction;
     QList<QAction *> _actionList;
     TextEditState textEditState;
 };

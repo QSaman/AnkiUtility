@@ -7,7 +7,11 @@
 #include <QDebug>
 #include <QContextMenuEvent>
 #include <QIcon>
-#include <QToolBar>
+#include <QWidget>
+#include <QMenu>
+#include <QApplication>
+#include <QClipboard>
+#include <QMimeData>
 
 #define var(x) #x << ": " << x
 
@@ -16,12 +20,29 @@ DictionaryTextEdit::DictionaryTextEdit(QWidget *parent) :
 {
     XmlBasedSettings::loadXmlBasedSettings();
     initActions();
-    setContextMenuPolicy(Qt::ActionsContextMenu);
+    //setContextMenuPolicy(Qt::ActionsContextMenu);
+    connect(QApplication::clipboard(), SIGNAL(dataChanged()), this, SLOT(clipboardDataChanged()));
 }
 
-void DictionaryTextEdit::populateEditToolBar(QToolBar *editToolBar)
+void DictionaryTextEdit::clipboardDataChanged()
 {
-    editToolBar->addActions(_actionList);
+    const QMimeData * md = QApplication::clipboard()->mimeData();
+    if (md == 0)
+        return;
+    pasteAction->setEnabled(md->hasText());
+}
+
+void DictionaryTextEdit::contextMenuEvent(QContextMenuEvent *e)
+{
+    QMenu menu;
+    menu.addActions(_actionList);
+    menu.exec(e->globalPos());
+
+}
+
+void DictionaryTextEdit::populateEditToolBar(QWidget *widget)
+{
+    widget->addActions(_actionList);
 }
 
 void DictionaryTextEdit::initActions()
@@ -43,6 +64,13 @@ void DictionaryTextEdit::initActions()
     connect(this, SIGNAL(copyAvailable(bool)), cutAction, SLOT(setEnabled(bool)));
     addAction((cutAction));
     _actionList.push_back(cutAction);
+
+    pasteAction = new QAction("&Paste", this);
+    pasteAction->setShortcut(QKeySequence::Paste);
+    pasteAction->setIcon(QIcon(":/Resources/Images/paste.png"));
+    clipboardDataChanged();
+    connect(pasteAction, SIGNAL(triggered()), this, SLOT(paste()));
+    _actionList.push_back(pasteAction);
 }
 
 void DictionaryTextEdit::insertFromMimeData(const QMimeData * source)
@@ -64,24 +92,12 @@ void DictionaryTextEdit::copy()
 
     if (!m_copyImage)
     {
-//        cur = textCursor();
-//        qDebug() << "Before save state: " << var(cur.selectionStart()) << " - " << var(cur.selectionEnd());
-//        qDebug() << "************************************";
         textEditState.saveState(this);
-//        cur = textCursor();
-//        qDebug() << "After save state and before delete images: " << var(cur.selectionStart()) << " - " << var(cur.selectionEnd());
-//        qDebug() << "************************************";
         deleteImages();
-//        cur = textCursor();
-//        qDebug() << "After delete images: " << var(cur.selectionStart()) << " - " << var(cur.selectionEnd());
-//        qDebug() << "************************************";
     }
     QTextEdit::copy();
     if (!m_copyImage)
         textEditState.restoreState(this);
-//    cur = textCursor();
-//    qDebug() << "after restore state: "  << var(cur.selectionStart()) << " - " << var(cur.selectionEnd());
-//    qDebug() << "################################################################";
 }
 
 void DictionaryTextEdit::cut()
@@ -96,6 +112,29 @@ void DictionaryTextEdit::deleteImages()
     QTextCursor cursor = textCursor();
     htmlModifier.DeleteImages(cursor);
     setTextCursor(cursor);
+}
+
+void DictionaryTextEdit::keyPressEvent(QKeyEvent *e)
+{
+    if (!(e->modifiers() | Qt::ControlModifier))
+    {
+        QTextEdit::keyPressEvent(e);
+        return;
+    }
+    if (e->key() == Qt::Key_C)    //CTRL+C
+    {
+        e->accept();
+        if (copyAction->isEnabled())
+            copy();
+    }
+    else if (e->key() == Qt::Key_X) //CTRL+X
+    {
+        e->accept();
+        if (cutAction->isEnabled())
+            cut();
+    }
+    else
+        QTextEdit::keyPressEvent(e);
 }
 
 void DictionaryTextEdit::TextEditState::saveState(QTextEdit *textEidt)
