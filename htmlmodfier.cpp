@@ -42,8 +42,13 @@ bool HtmlModifier::DeleteImages(QTextCursor &textCursor)
     if (!textCursor.hasSelection())
         return false;
     textDocument.setHtml(textCursor.selection().toHtml());
+    //qDebug() << textDocument.toHtml();
     modifyImagePath(true);
+    int first = textCursor.position();
     textCursor.insertHtml(textDocument.toHtml());
+    int last = textCursor.position();
+    textCursor.setPosition(first);
+    textCursor.setPosition(last, QTextCursor::KeepAnchor);
     return true;
 }
 

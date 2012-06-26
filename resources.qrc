@@ -3,5 +3,7 @@
         <file>Resources/Images/1340368690_iPhoto.png</file>
         <file>Resources/XMLs/DictionaryResources.xml</file>
         <file>Resources/Images/Delete-icon.png</file>
+        <file>Resources/Images/copy.png</file>
+        <file>Resources/Images/cut.png</file>
     </qresource>
 </RCC>
