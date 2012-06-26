@@ -44,11 +44,11 @@ bool HtmlModifier::DeleteImages(QTextCursor &textCursor)
     textDocument.setHtml(textCursor.selection().toHtml());
     //qDebug() << textDocument.toHtml();
     modifyImagePath(true);
-    int first = textCursor.position();
+    int start = textCursor.selectionStart();
     textCursor.insertHtml(textDocument.toHtml());
-    int last = textCursor.position();
-    textCursor.setPosition(first);
-    textCursor.setPosition(last, QTextCursor::KeepAnchor);
+    int end = textCursor.selectionEnd();
+    textCursor.setPosition(start);
+    textCursor.setPosition(end, QTextCursor::KeepAnchor);
     return true;
 }
 

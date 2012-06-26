@@ -103,8 +103,6 @@ void DictionaryTextEdit::TextEditState::saveState(QTextEdit *textEidt)
     QTextCursor cursor = textEidt->textCursor();
     _selectionStart = cursor.selectionStart();
     _selectionEnd = cursor.selectionEnd();
-    qDebug() << var(_selectionStart);
-    qDebug() << var(_selectionEnd);
     _htmlDoc = textEidt->toHtml();
     hasSavedState = true;
 }
