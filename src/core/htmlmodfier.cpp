@@ -9,6 +9,8 @@
 #include <QDir>
 #include <QTextCursor>
 #include <QTextDocumentFragment>
+#include <QFont>
+#include <QTextCharFormat>
 
 #define var(x) #x << ": " << x
 
@@ -20,8 +22,8 @@ HtmlModifier::HtmlModifier()
 
 QString HtmlModifier::normalizeHtml(const QString &htmlString)
 {
-    textDocument.setHtml(htmlString);
-    modifyImagePath();
+    textDocument.setHtml(htmlString);    
+    modifyTextFragments(HtmlModifier::ModifyImage | HtmlModifier::ModifyFontPointSize);
     modifyText();
     return textDocument.toHtml();
 }
@@ -32,18 +34,26 @@ void HtmlModifier::modifyText()
     for (cursor = textDocument.find(replacingString, cursor); !cursor.isNull() && !cursor.atEnd();
          cursor = textDocument.find(replacingString, cursor))
     {
-        //cursor.setPosition(cursor.position() + replacingString.length(), QTextCursor::KeepAnchor);
+        int selectionStart = cursor.selectionStart();
         cursor.insertText(QString(QChar(0x30FB)));
+        int selectionEnd = cursor.selectionEnd();
+        cursor.setPosition(selectionStart);
+        cursor.setPosition(selectionEnd, QTextCursor::KeepAnchor);
+        QTextCharFormat charFormat = cursor.charFormat();
+        QFont font = charFormat.font();
+        font.setPointSize(14);
+        charFormat.setFont(font);
+        cursor.setCharFormat(charFormat);
     }
 }
 
-bool HtmlModifier::DeleteImages(QTextCursor &textCursor)
+bool HtmlModifier::convertImageToText(QTextCursor &textCursor)
 {
     if (!textCursor.hasSelection())
         return false;
     textDocument.setHtml(textCursor.selection().toHtml());
     //qDebug() << textDocument.toHtml();
-    modifyImagePath(true);
+    modifyTextFragments(HtmlModifier::ConvertImageToText);
     int start = textCursor.selectionStart();
     textCursor.insertHtml(textDocument.toHtml());
     int end = textCursor.selectionEnd();
@@ -52,51 +62,78 @@ bool HtmlModifier::DeleteImages(QTextCursor &textCursor)
     return true;
 }
 
-void HtmlModifier::modifyImagePath(bool removeImages)
+void HtmlModifier::modifyFontPointSize(QTextCharFormat charFormat, int fragmentStartPosition, int fragmentEndPosition)
 {
-//    qDebug() << htmlString;    
+    QFont font = charFormat.font();
+    qDebug() << var(font.pixelSize()) << " - " << var(font.pointSize());
+    qDebug() << "******************************************";
+    if (font.pixelSize() == 13 && font.pointSize() == -1)
+        font.setPointSize(14);
+    else if (font.pixelSize() == -1 && font.pointSize() == 11)
+        font.setPointSize(16);
+    charFormat.setFont(font);
+    QTextCursor cursor(&textDocument);
+    cursor.setPosition(fragmentStartPosition);
+    cursor.setPosition(fragmentEndPosition, QTextCursor::KeepAnchor);
+    cursor.setCharFormat(charFormat);
+}
+
+void HtmlModifier::modifyImage(HtmlModifier::TextFragments tf, QTextCharFormat charFormat, int fragmentStartPosition, int fragmentEndPosition)
+{
+    QTextImageFormat imageFormat = charFormat.toImageFormat();
+    if (!imageFormat.isValid())
+        return;
+    QString imageName = QFileInfo(imageFormat.name()).fileName();
+    QString imageValue = XmlBasedSettings::imageValue(imageName);
+    QList<QString> listString = XmlBasedSettings::resourcePathList();
+    for (int i = 0; i < listString.count(); ++i)
+    {
+        QDir dir(listString[i]);
+        QFileInfo fileInfo(dir, imageName);
+        if (fileInfo.exists())
+        {
+            imageFormat.setName(fileInfo.absoluteFilePath());
+            QTextCursor cursor(&textDocument);
+            cursor.setPosition(fragmentStartPosition);
+            cursor.setPosition(fragmentEndPosition, QTextCursor::KeepAnchor);
+            if ((tf & HtmlModifier::ConvertImageToText) && imageValue != "")
+            {
+                int selectionStart = cursor.selectionStart();
+                cursor.insertHtml(imageValue);
+                int selectionEnd = cursor.selectionEnd();
+                cursor.setPosition(selectionStart);
+                cursor.setPosition(selectionEnd, QTextCursor::KeepAnchor);
+                QTextCharFormat charFormat = cursor.charFormat();
+                QFont font = charFormat.font();
+                font.setPointSize(14);
+                charFormat.setFont(font);
+                cursor.setCharFormat(charFormat);
+            }
+            else
+                cursor.setCharFormat(imageFormat);
+            break;
+        }
+    }
+}
+
+void HtmlModifier::modifyTextFragments(HtmlModifier::TextFragments tf)
+{
     QTextBlock currentBlock = textDocument.begin();
     for (; currentBlock.isValid(); currentBlock = currentBlock.next())
     {
-        //qDebug() << "Block";
         QTextBlock::Iterator iter;
         for (iter = currentBlock.begin(); iter != currentBlock.end(); ++iter)
         {
             QTextFragment currentFragment = iter.fragment();
             if (!currentFragment.isValid())
                 continue;
-            QTextImageFormat imageFormat = currentFragment.charFormat().toImageFormat();
-            if (!imageFormat.isValid())
-                continue;
-            QString imageName = QFileInfo(imageFormat.name()).fileName();
-            QString imageValue = XmlBasedSettings::imageValue(imageName);
-            //qDebug() << var(imageValue);
-            QList<QString> listString = XmlBasedSettings::resourcePathList();
-            for (int i = 0; i < listString.count(); ++i)
-            {
-                QDir dir(listString[i]);
-                QFileInfo fileInfo(dir, imageName);
-                if (fileInfo.exists())
-                {
-                    imageFormat.setName(fileInfo.absoluteFilePath());
-                    QTextCursor cursor(&textDocument);
-                    cursor.setPosition(currentFragment.position());
-                    cursor.setPosition(currentFragment.position() + currentFragment.length(), QTextCursor::KeepAnchor);
-                    if (removeImages && imageValue != "")
-                    {
-                        //qDebug() << var(imageName) << " - " << var(imageValue);
-                        //cursor.removeSelectedText();
-                        cursor.insertHtml(imageValue);
-//                        if (imageValue == "bullet")
-//                            cursor.insertText(replacingString);
-//                        else
-//                            cursor.insertText(imageValue);
-                    }
-                    else
-                        cursor.setCharFormat(imageFormat);
-                    break;
-                }
-            }
+            int startPosition = currentFragment.position();
+            int endPosition = currentFragment.position() + currentFragment.length();
+            QTextCharFormat charFormat = currentFragment.charFormat();
+            if (tf & HtmlModifier::ModifyFontPointSize)
+                modifyFontPointSize(charFormat, startPosition, endPosition);
+            if (tf & (HtmlModifier::ModifyImage | HtmlModifier::ConvertImageToText))
+                modifyImage(tf, charFormat, startPosition, endPosition);
         }
     }
 }

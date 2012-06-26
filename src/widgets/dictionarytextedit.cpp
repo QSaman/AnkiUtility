@@ -133,7 +133,7 @@ void DictionaryTextEdit::cut()
 void DictionaryTextEdit::deleteImages()
 {
     QTextCursor cursor = textCursor();
-    htmlModifier.DeleteImages(cursor);
+    htmlModifier.convertImageToText(cursor);
     setTextCursor(cursor);
 }
 
