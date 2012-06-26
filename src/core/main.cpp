@@ -1,5 +1,5 @@
 #include <QtGui/QApplication>
-#include "mainwindow.h"
+#include "src/forms/src/mainwindow.h"
 
 #include <iostream>
 

@@ -1,4 +1,4 @@
-#include "xmlbasedsettings.h"
+#include "src/core/xmlbasedsettings.h"
 #include <QFile>
 #include <QMessageBox>
 #include <QXmlStreamReader>

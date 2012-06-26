@@ -1,5 +1,5 @@
-#include "htmlmodfier.h"
-#include "xmlbasedsettings.h"
+#include "src/core/htmlmodfier.h"
+#include "src/core/xmlbasedsettings.h"
 #include <QDebug>
 #include <QFileInfo>
 #include <QTextDocument>

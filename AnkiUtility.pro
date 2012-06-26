@@ -10,18 +10,18 @@ TARGET = AnkiUtility
 TEMPLATE = app
 
 
-SOURCES += main.cpp\
-        mainwindow.cpp \
-    dictionarytextedit.cpp \
-    xmlbasedsettings.cpp \
-    htmlmodfier.cpp
+SOURCES += src/core/main.cpp\
+        src/forms/src/mainwindow.cpp \
+    src/widgets/dictionarytextedit.cpp \
+    src/core/xmlbasedsettings.cpp \
+    src/core/htmlmodfier.cpp
 
-HEADERS  += mainwindow.h \
-    dictionarytextedit.h \
-    xmlbasedsettings.h \
-    htmlmodfier.h
+HEADERS  += src/forms/src/mainwindow.h \
+    src/widgets/dictionarytextedit.h \
+    src/core/xmlbasedsettings.h \
+    src/core/htmlmodfier.h
 
-FORMS    += mainwindow.ui
+FORMS    += src/forms/ui/mainwindow.ui
 
 RESOURCES += \
     resources.qrc

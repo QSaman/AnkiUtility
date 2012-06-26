@@ -1,6 +1,6 @@
-#include "dictionarytextedit.h"
-#include "xmlbasedsettings.h"
-#include "mainwindow.h"
+#include "src/widgets/dictionarytextedit.h"
+#include "src/core/xmlbasedsettings.h"
+#include "src/forms/src/mainwindow.h"
 #include <QMimeData>
 #include <QAction>
 #include <QList>

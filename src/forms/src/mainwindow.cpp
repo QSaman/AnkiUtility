@@ -1,4 +1,4 @@
-#include "mainwindow.h"
+#include "src/forms/src/mainwindow.h"
 #include "ui_mainwindow.h"
 #include <QSize>
 

@@ -2,7 +2,7 @@
 #define DICTIONARYTEXTEDIT_H
 
 #include <QTextEdit>
-#include "htmlmodfier.h"
+#include "src/core/htmlmodfier.h"
 #include <QList>
 #include <QString>
 
