@@ -101,7 +101,7 @@ void DictionaryTextEdit::insertFromMimeData(const QMimeData * source)
     if (source->hasHtml())
         insertHtml(htmlModifier.normalizeHtml(source->html()));
     else
-        QTextEdit::insertFromMimeData(source);
+        QTextEdit::insertFromMimeData(source);    
 }
 
 void DictionaryTextEdit::copyImages(bool copy)

@@ -81,14 +81,14 @@ void HtmlModifier::modifyFont(HtmlModifier::TextFragments tf, QTextCharFormat ch
     //qDebug() << "******************************************";
     if (tf & HtmlModifier::ModifyFontPointSize)
     {
-        if (font.pixelSize() == 13 && font.pointSize() == -1)
+        if ((font.pixelSize() == 13 || font.pixelSize() == 14) && font.pointSize() == -1)
             font.setPointSize(14);
         else if (font.pixelSize() == -1 && font.pointSize() == 11)
             font.setPointSize(16);
     }
     else
     {
-        qDebug() << var(_fontStretch);
+        //qDebug() << var(_fontStretch);
         font.setStretch(_fontStretch);
     }
     charFormat.setFont(font);
@@ -113,13 +113,11 @@ void HtmlModifier::modifyImage(HtmlModifier::TextFragments tf, QTextCharFormat c
 {
     QTextImageFormat imageFormat = charFormat.toImageFormat();
     if (!imageFormat.isValid())
-        return;
+        return;    
     QString imageName = QFileInfo(imageFormat.name()).fileName();
+    if (imageName.length() > 0 && imageName[0] == '%')
+        imageName = imageName.mid(3);
     QString imageValue = XmlBasedSettings::imageValue(imageName);
-    qDebug() << var(tf);
-    qDebug() << var(HtmlModifier::IndentExamples);
-    if (tf & HtmlModifier::IndentExamples)
-        qDebug() << "Yes";
     if (tf & HtmlModifier::IndentExamples)
         indentLine(imageName, fragmentStartPosition, fragmentEndPosition);
     QList<QString> listString = XmlBasedSettings::resourcePathList();
