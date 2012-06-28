@@ -7,7 +7,7 @@
 			<!-- <b>%1. </b> -->
 			<format id="0">&lt;b&gt;%1. &lt;/b&gt;</format>
 			<!-- <b>%1</b> -->
-			<format id="0">&lt;b&gt;&#160;&#160;&#160;&#160;&#x30fb;&lt;/b&gt;</format>
+			<format id="0">&lt;b&gt;&#x30fb;&lt;/b&gt;</format>
 		</format_collection>
         <image_collection>
             <image>

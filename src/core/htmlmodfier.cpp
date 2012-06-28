@@ -22,17 +22,20 @@ HtmlModifier::HtmlModifier()
 
 QString HtmlModifier::normalizeHtml(const QString &htmlString)
 {
-    textDocument.setHtml(htmlString);    
-    modifyTextFragments(HtmlModifier::ModifyImage | HtmlModifier::ModifyFontPointSize);
+    textDocument = new QTextDocument();
+    textDocument->setHtml(htmlString);
+    modifyTextFragments(HtmlModifier::ModifyImage | HtmlModifier::ModifyFontPointSize | HtmlModifier::IndentExamples);
     modifyText();
-    return textDocument.toHtml();
+    QString ret = textDocument->toHtml();
+    delete textDocument;
+    return ret;
 }
 
 void HtmlModifier::modifyText()
 {
-    QTextCursor cursor(&textDocument);
-    for (cursor = textDocument.find(replacingString, cursor); !cursor.isNull() && !cursor.atEnd();
-         cursor = textDocument.find(replacingString, cursor))
+    QTextCursor cursor(textDocument);
+    for (cursor = textDocument->find(replacingString, cursor); !cursor.isNull() && !cursor.atEnd();
+         cursor = textDocument->find(replacingString, cursor))
     {
         int selectionStart = cursor.selectionStart();
         cursor.insertText(QString(QChar(0x30FB)));
@@ -51,31 +54,59 @@ bool HtmlModifier::convertImageToText(QTextCursor &textCursor)
 {
     if (!textCursor.hasSelection())
         return false;
-    textDocument.setHtml(textCursor.selection().toHtml());
+    textDocument = new QTextDocument();
+    textDocument->setHtml(textCursor.selection().toHtml());
     //qDebug() << textDocument.toHtml();
     modifyTextFragments(HtmlModifier::ConvertImageToText);
     int start = textCursor.selectionStart();
-    textCursor.insertHtml(textDocument.toHtml());
+    textCursor.insertHtml(textDocument->toHtml());
     int end = textCursor.selectionEnd();
     textCursor.setPosition(start);
     textCursor.setPosition(end, QTextCursor::KeepAnchor);
+    delete textDocument;
     return true;
 }
 
-void HtmlModifier::modifyFontPointSize(QTextCharFormat charFormat, int fragmentStartPosition, int fragmentEndPosition)
+void HtmlModifier::changeFontStretch(QTextDocument *document, int fontStretch)
+{
+    textDocument = document;
+    _fontStretch = fontStretch;
+    modifyTextFragments(HtmlModifier::ModifyFontStretch);
+}
+
+void HtmlModifier::modifyFont(HtmlModifier::TextFragments tf, QTextCharFormat charFormat, int fragmentStartPosition, int fragmentEndPosition)
 {
     QFont font = charFormat.font();
-    qDebug() << var(font.pixelSize()) << " - " << var(font.pointSize());
-    qDebug() << "******************************************";
-    if (font.pixelSize() == 13 && font.pointSize() == -1)
-        font.setPointSize(14);
-    else if (font.pixelSize() == -1 && font.pointSize() == 11)
-        font.setPointSize(16);
+    //qDebug() << var(font.pixelSize()) << " - " << var(font.pointSize());
+    //qDebug() << "******************************************";
+    if (tf & HtmlModifier::ModifyFontPointSize)
+    {
+        if (font.pixelSize() == 13 && font.pointSize() == -1)
+            font.setPointSize(14);
+        else if (font.pixelSize() == -1 && font.pointSize() == 11)
+            font.setPointSize(16);
+    }
+    else
+    {
+        qDebug() << var(_fontStretch);
+        font.setStretch(_fontStretch);
+    }
     charFormat.setFont(font);
-    QTextCursor cursor(&textDocument);
+    QTextCursor cursor(textDocument);
     cursor.setPosition(fragmentStartPosition);
     cursor.setPosition(fragmentEndPosition, QTextCursor::KeepAnchor);
     cursor.setCharFormat(charFormat);
+}
+
+void HtmlModifier::indentLine(const QString & imageName, int &fragmentStartPositin, int &fragmentEndPosition)
+{
+    if (imageName != "8CB0DC57.png")
+        return;
+    QTextCursor cursor(textDocument);
+    cursor.setPosition(fragmentStartPositin);
+    QString indentStr = "  ";
+    cursor.insertText(indentStr);
+    fragmentEndPosition += indentStr.length();
 }
 
 void HtmlModifier::modifyImage(HtmlModifier::TextFragments tf, QTextCharFormat charFormat, int fragmentStartPosition, int fragmentEndPosition)
@@ -85,6 +116,12 @@ void HtmlModifier::modifyImage(HtmlModifier::TextFragments tf, QTextCharFormat c
         return;
     QString imageName = QFileInfo(imageFormat.name()).fileName();
     QString imageValue = XmlBasedSettings::imageValue(imageName);
+    qDebug() << var(tf);
+    qDebug() << var(HtmlModifier::IndentExamples);
+    if (tf & HtmlModifier::IndentExamples)
+        qDebug() << "Yes";
+    if (tf & HtmlModifier::IndentExamples)
+        indentLine(imageName, fragmentStartPosition, fragmentEndPosition);
     QList<QString> listString = XmlBasedSettings::resourcePathList();
     for (int i = 0; i < listString.count(); ++i)
     {
@@ -93,7 +130,7 @@ void HtmlModifier::modifyImage(HtmlModifier::TextFragments tf, QTextCharFormat c
         if (fileInfo.exists())
         {
             imageFormat.setName(fileInfo.absoluteFilePath());
-            QTextCursor cursor(&textDocument);
+            QTextCursor cursor(textDocument);
             cursor.setPosition(fragmentStartPosition);
             cursor.setPosition(fragmentEndPosition, QTextCursor::KeepAnchor);
             if ((tf & HtmlModifier::ConvertImageToText) && imageValue != "")
@@ -118,7 +155,7 @@ void HtmlModifier::modifyImage(HtmlModifier::TextFragments tf, QTextCharFormat c
 
 void HtmlModifier::modifyTextFragments(HtmlModifier::TextFragments tf)
 {
-    QTextBlock currentBlock = textDocument.begin();
+    QTextBlock currentBlock = textDocument->begin();
     for (; currentBlock.isValid(); currentBlock = currentBlock.next())
     {
         QTextBlock::Iterator iter;
@@ -130,8 +167,8 @@ void HtmlModifier::modifyTextFragments(HtmlModifier::TextFragments tf)
             int startPosition = currentFragment.position();
             int endPosition = currentFragment.position() + currentFragment.length();
             QTextCharFormat charFormat = currentFragment.charFormat();
-            if (tf & HtmlModifier::ModifyFontPointSize)
-                modifyFontPointSize(charFormat, startPosition, endPosition);
+            if (tf & (HtmlModifier::ModifyFontPointSize | HtmlModifier::ModifyFontStretch))
+                modifyFont(tf, charFormat, startPosition, endPosition);
             if (tf & (HtmlModifier::ModifyImage | HtmlModifier::ConvertImageToText))
                 modifyImage(tf, charFormat, startPosition, endPosition);
         }
