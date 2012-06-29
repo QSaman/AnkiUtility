@@ -16,7 +16,8 @@ private:
         ModifyImage = 0x02,
         ModifyFontPointSize = 0x04,
         ModifyFontStretch = 0x08,
-        IndentExamples = 0x10
+        IndentExamples = 0x10,
+        RemoveHyperLink = 0x20
     };
 public:
     HtmlModifier();
