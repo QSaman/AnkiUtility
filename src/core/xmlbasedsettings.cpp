@@ -59,7 +59,6 @@ const QString XmlBasedSettings::imageValue(QString &imageName, int dictionaryInd
     for (int i = 0; i < _dictionaries.count(); ++i)
         if (_dictionaries[i].imageValue(imageName) != "")
             return _dictionaries[i].imageValue(imageName);
-    qDebug() << var(imageName) << " - " << "OOPS!";
     return _emptyString;
 }
 
