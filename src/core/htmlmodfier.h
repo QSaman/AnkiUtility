@@ -31,7 +31,7 @@ private:
     void modifyFontSize();
     void modifyFont(HtmlModifier::TextFragments tf, QTextCharFormat charFormat, int fragmentStartPosition, int fragmentEndPosition);
     void modifyImage(HtmlModifier::TextFragments tf, QTextCharFormat charFormat, int fragmentStartPosition, int fragmentEndPosition);
-    void indentLine(const QString &imageName, int &fragmentStartPositin, int &fragmentEndPosition);   //both input integer will be modified by function
+    void indentLine(const QString &imageName, int &fragmentStartPositin, int &fragmentEndPosition);   //both input integer will be modified by function    
 
     QTextDocument * textDocument;
     int _fontStretch;

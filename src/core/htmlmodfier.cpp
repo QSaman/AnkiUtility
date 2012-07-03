@@ -117,8 +117,6 @@ void HtmlModifier::modifyImage(HtmlModifier::TextFragments tf, QTextCharFormat c
     if (!imageFormat.isValid())
         return;    
     QString imageName = QFileInfo(imageFormat.name()).fileName();
-    if (imageName.length() > 0 && imageName[0] == '%')
-        imageName = imageName.mid(3);
     QString imageValue = XmlBasedSettings::imageValue(imageName);
     if (tf & HtmlModifier::IndentExamples)
         indentLine(imageName, fragmentStartPosition, fragmentEndPosition);

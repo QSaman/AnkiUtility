@@ -5,7 +5,7 @@
 
 #include <QDebug>
 
-#define vard(x) #x << ": " << x
+#define var(x) #x << ": " << x
 
 const QString errorTitle = "Parsing Error";
 const QString errorMsg = "I expect %1 instead of %2 in line %3 in file %4";
@@ -17,6 +17,21 @@ XmlBasedSettings::Dictionary::Dictionary(const QString & dictionaryName, const Q
     _dicName(dictionaryName), _resourcePath(resourcePath), _fileValue(fileValue),_fileFormatIndex(fileFormatIndex), _formatList(formatList)
 {
 }
+
+QString XmlBasedSettings::correctedImageName(const QString &imageName)
+{
+    QString str;
+    if (imageName.length() > 3 && imageName[0] == '%')  //It seems it's for Nix environment
+        str = imageName.mid(3);
+    else    //It seems it's for win32 environment
+    {
+        for (int i = 0; i < imageName.length(); ++i)
+            if (imageName[i].isLetterOrNumber() || imageName[i] == '.')
+                str += imageName[i];
+    }
+    return str;
+}
+
 
 QList<QString> XmlBasedSettings::resourcePathList()
 {
@@ -36,13 +51,15 @@ QList<QString> XmlBasedSettings::resourcePathList()
 //    return _emptyString;
 //}
 
-const QString XmlBasedSettings::imageValue(const QString &imageName, int dictionaryIndex)
+const QString XmlBasedSettings::imageValue(QString &imageName, int dictionaryIndex)
 {
+    imageName = correctedImageName(imageName);
     if (dictionaryIndex != -1)
         return _dictionaries[dictionaryIndex].imageValue(imageName);
     for (int i = 0; i < _dictionaries.count(); ++i)
         if (_dictionaries[i].imageValue(imageName) != "")
             return _dictionaries[i].imageValue(imageName);
+    qDebug() << var(imageName) << " - " << "OOPS!";
     return _emptyString;
 }
 
