@@ -1,7 +1,7 @@
 <dictionaries>
     <dictionary>
         <name>Longman Dictionary of Contemporary English (4th Ed)</name>
-        <resource_path>/home/saman/.stardict/dic/stardict-babylon-Longman-img-2.4.2/res</resource_path>
+        <resource_path>/media/NixHddData/MyStuff/ESL/Dictionaries/GoldenDict/dic/stardict-babylon-Longman-img-2.4.2/res</resource_path>
 		<format_collection>
 			<!-- If you don't specify format_id attribute in image tag, the default would be 0 -->
 			<!-- <b>%1. </b> -->
@@ -290,7 +290,7 @@
     </dictionary>
     <dictionary>
         <name>Collins COBUILD English Dictionary</name>
-        <resource_path>/home/saman/.stardict/dic/stardict-babylon-collins-en-cc3-2.4.2/res</resource_path>
+        <resource_path>/media/NixHddData/MyStuff/ESL/Dictionaries/GoldenDict/dic/stardict-babylon-collins-en-cc3-2.4.2/res</resource_path>
 		<format_collection>
 			<!-- If you don't specify format_id attribute in image tag, the default would be 0 -->
 			<!-- <b>%1. </b> -->

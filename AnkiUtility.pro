@@ -25,4 +25,4 @@ FORMS    += src/forms/ui/mainwindow.ui
 
 RESOURCES += \
     resources.qrc
-CONFIG   += console
+#CONFIG   += console

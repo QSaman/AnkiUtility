@@ -16,6 +16,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->textEdit->populateEditWidget(ui->menu_Edit);
     ui->textEdit->populateFontWidget(ui->fontToolBar);
     ui->fontToolBar->setIconSize(QSize(30, 30));
+    setWindowState(Qt::WindowMaximized);
 }
 
 MainWindow::~MainWindow()
