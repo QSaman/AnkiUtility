@@ -16,7 +16,8 @@
 #define var(x) #x << ": " << x
 
 DictionaryTextEdit::DictionaryTextEdit(QWidget *parent) :
-    QTextEdit(parent)
+    QTextEdit(parent),
+    m_copyImage(false)
 {
     XmlBasedSettings::loadXmlBasedSettings();
     initActions();
