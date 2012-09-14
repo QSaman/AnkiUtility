@@ -100,7 +100,10 @@ void DictionaryTextEdit::initActions()
 void DictionaryTextEdit::insertFromMimeData(const QMimeData * source)
 {
     if (source->hasHtml())
-        insertHtml(htmlModifier.normalizeHtml(source->html()));
+    {
+        QString str = source->html();
+        insertHtml(htmlModifier.normalizeHtml(str));
+    }
     else
         QTextEdit::insertFromMimeData(source);    
 }

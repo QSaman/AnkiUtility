@@ -6,6 +6,7 @@
 class QString;
 class QTextImageFormat;
 class QTextDocument;
+class QTextFragment;
 
 class HtmlModifier
 {
@@ -21,7 +22,7 @@ private:
     };
 public:
     HtmlModifier();
-    QString normalizeHtml(const QString & htmlString);
+    QString normalizeHtml(QString & htmlString);
     bool convertImageToText(QTextCursor & textCursor);
     void changeFontStretch(QTextDocument * document, int fontStretch);
     Q_DECLARE_FLAGS(TextFragments, TextFragment)

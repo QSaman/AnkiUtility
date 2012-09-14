@@ -20,8 +20,11 @@ HtmlModifier::HtmlModifier()
 {
 }
 
-QString HtmlModifier::normalizeHtml(const QString &htmlString)
+QString HtmlModifier::normalizeHtml(QString &htmlString)
 {
+    qDebug() << var(htmlString);
+    htmlString.remove("<blockquote>");
+    htmlString.remove("</blockquote>");
     textDocument = new QTextDocument();
     textDocument->setHtml(htmlString);
     modifyTextFragments(HtmlModifier::ModifyImage | HtmlModifier::ModifyFontPointSize | HtmlModifier::IndentExamples | HtmlModifier::RemoveHyperLink);
