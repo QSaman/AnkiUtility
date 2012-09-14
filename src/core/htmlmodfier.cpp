@@ -22,7 +22,6 @@ HtmlModifier::HtmlModifier()
 
 QString HtmlModifier::normalizeHtml(QString &htmlString)
 {
-    qDebug() << var(htmlString);
     htmlString.remove("<blockquote>");
     htmlString.remove("</blockquote>");
     textDocument = new QTextDocument();
