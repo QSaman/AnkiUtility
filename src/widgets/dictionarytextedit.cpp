@@ -143,7 +143,7 @@ void DictionaryTextEdit::deleteImages()
 
 void DictionaryTextEdit::keyPressEvent(QKeyEvent *e)
 {
-    if (!(e->modifiers() | Qt::ControlModifier))
+    if (!(e->modifiers() & Qt::ControlModifier))
     {
         QTextEdit::keyPressEvent(e);
         return;
