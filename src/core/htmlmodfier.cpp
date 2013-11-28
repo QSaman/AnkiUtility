@@ -42,8 +42,8 @@ QString HtmlModifier::normalizeHtml(QString &htmlString)
     //htmlString.remove("<blockquote>");
     //htmlString.remove("</blockquote>");
     //I add these two lines for Fedora 19
-    htmlString.replace("<blockquote", "<span");
-    htmlString.replace("</blockquote>", "</span>");
+    //htmlString.replace("<blockquote", "<span");
+    //htmlString.replace("</blockquote>", "</span>");
     textDocument = new QTextDocument();
     textDocument->setHtml(htmlString);
     modifyTextFragments(HtmlModifier::ModifyImage | HtmlModifier::ModifyFontPointSize | HtmlModifier::IndentExamples | HtmlModifier::RemoveHyperLink);
