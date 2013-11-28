@@ -20,10 +20,26 @@ HtmlModifier::HtmlModifier()
 {
 }
 
+//Notice: I don't need to use below function in openSUSE. I use it in Fedora 19
+QString HtmlModifier::normalizeBrTag(QString htmlString)
+{
+    if (htmlString.isNull() || htmlString.isEmpty())
+        return "";
+    int index = htmlString.indexOf("<br");
+    if (index == -1)
+        return htmlString;
+    int i;
+    for (i = index + 1; i < htmlString.size() && htmlString[i] != '>'; ++i);
+    if (i == htmlString.size())
+        return htmlString;
+    return htmlString.mid(0, index) + "<br/>" + normalizeBrTag(htmlString.mid(i + 1));
+}
+
 QString HtmlModifier::normalizeHtml(QString &htmlString)
 {
     htmlString.remove("<blockquote>");
     htmlString.remove("</blockquote>");
+    htmlString = normalizeBrTag(htmlString);
     textDocument = new QTextDocument();
     textDocument->setHtml(htmlString);
     modifyTextFragments(HtmlModifier::ModifyImage | HtmlModifier::ModifyFontPointSize | HtmlModifier::IndentExamples | HtmlModifier::RemoveHyperLink);
