@@ -24,7 +24,7 @@ public:
     HtmlModifier();
     QString normalizeHtml(QString & htmlString);
     //Notice: I don't need to use below function in openSUSE. I use it in Fedora 19
-    QString normalizeBrTag(QString htmlString);
+    QString removeTagAttributes(QString tagName, QString htmlString);
     bool convertImageToText(QTextCursor & textCursor);
     void changeFontStretch(QTextDocument * document, int fontStretch);
     Q_DECLARE_FLAGS(TextFragments, TextFragment)
