@@ -35,9 +35,21 @@ QString HtmlModifier::removeTagAttributes(QString tagName, QString htmlString)
     return htmlString.mid(0, index) + "<" + tagName + "/>" + removeTagAttributes(tagName, htmlString.mid(i + 1));
 }
 
+QString HtmlModifier::removeImageLink(QString imageString, QString htmlString)
+{
+//    int index = htmlString.indexOf(imageString);
+//    if (index == -1)
+//        return htmlString;
+//    int i, j;
+//    string anchor
+//    for (i = index; i >= 0 && )
+}
+
 QString HtmlModifier::normalizeHtml(QString &htmlString)
 {
     htmlString = removeTagAttributes("br", htmlString);
+    //qDebug() << var(htmlString);
+    //htmlString.replace("<img src=\"qrcx://localhost/icons/playsound.png\" border=\"0\" align=\"absmiddle\" alt=\"Play\" style=\"vertical-align: -30%;\">", "");
     //htmlString = removeTagAttributes("blockquote", htmlString);
     //htmlString.remove("<blockquote>");
     //htmlString.remove("</blockquote>");
@@ -46,6 +58,8 @@ QString HtmlModifier::normalizeHtml(QString &htmlString)
     //htmlString.replace("</blockquote>", "</span>");
     textDocument = new QTextDocument();
     textDocument->setHtml(htmlString);
+    //textDocument->setDefaultStyleSheet(".dsl_opt { display: inline; }");
+    //qDebug() << var(textDocument->toHtml());
     modifyTextFragments(HtmlModifier::ModifyImage | HtmlModifier::ModifyFontPointSize | HtmlModifier::IndentExamples | HtmlModifier::RemoveHyperLink);
     modifyText();
     QString ret = textDocument->toHtml();
@@ -133,6 +147,26 @@ void HtmlModifier::indentLine(const QString & imageName, int &fragmentStartPosit
     fragmentEndPosition += indentStr.length();
 }
 
+bool HtmlModifier::removeImage(QTextCharFormat charFormat, QTextBlock::Iterator &iter, int fragmentStartPosition, int fragmentEndPosition)
+{
+    QTextImageFormat imageFormat = charFormat.toImageFormat();
+    if (!imageFormat.isValid())
+        return false;
+    QString imageName = QFileInfo(imageFormat.name()).fileName();
+    if (imageName != "playsound.png")
+        return false;
+    charFormat.setAnchor(false);
+    charFormat.setAnchorHref("");
+    qDebug() << charFormat.anchorHref();
+    ++iter;
+
+    QTextCursor cursor(textDocument);
+    cursor.setPosition(fragmentStartPosition);
+    cursor.setPosition(fragmentEndPosition, QTextCursor::KeepAnchor);
+    cursor.removeSelectedText();
+    return true;
+}
+
 void HtmlModifier::modifyImage(HtmlModifier::TextFragments tf, QTextCharFormat charFormat, int fragmentStartPosition, int fragmentEndPosition)
 {
     QTextImageFormat imageFormat = charFormat.toImageFormat();
@@ -176,10 +210,12 @@ void HtmlModifier::modifyImage(HtmlModifier::TextFragments tf, QTextCharFormat c
 void HtmlModifier::modifyTextFragments(HtmlModifier::TextFragments tf)
 {
     QTextBlock currentBlock = textDocument->begin();
-    for (; currentBlock.isValid(); currentBlock = currentBlock.next())
+    bool removeBlock = false;
+    for (; currentBlock.isValid();)
     {
         QTextBlock::Iterator iter;
-        for (iter = currentBlock.begin(); iter != currentBlock.end(); ++iter)
+        qDebug() << "Block Starts";
+        for (iter = currentBlock.begin(); iter != currentBlock.end();)
         {
             QTextFragment currentFragment = iter.fragment();
             if (!currentFragment.isValid())
@@ -187,10 +223,36 @@ void HtmlModifier::modifyTextFragments(HtmlModifier::TextFragments tf)
             int startPosition = currentFragment.position();
             int endPosition = currentFragment.position() + currentFragment.length();
             QTextCharFormat charFormat = currentFragment.charFormat();
+            if (removeImage(charFormat, iter, startPosition, endPosition))
+            {
+                QString blockText = currentBlock.text();
+                int i;
+                for (i = 0; i < blockText.length() && !QChar::isLetterOrNumber(blockText[i].toLatin1()); ++i);
+                if (i >= blockText.length())
+                {
+                    removeBlock = true;
+                    break;
+                }
+                continue;
+            }
             if (tf & (HtmlModifier::ModifyFontPointSize | HtmlModifier::ModifyFontStretch))
                 modifyFont(tf, charFormat, startPosition, endPosition);
             if (tf & (HtmlModifier::ModifyImage | HtmlModifier::ConvertImageToText))
                 modifyImage(tf, charFormat, startPosition, endPosition);
+            ++iter;
         }
+        if (removeBlock)
+        {
+            removeBlock = false;
+            QTextCursor cursor(currentBlock);
+            currentBlock = currentBlock.next();
+            cursor.select(QTextCursor::BlockUnderCursor);
+            cursor.removeSelectedText();
+            cursor.movePosition(QTextCursor::NextBlock);
+            cursor.insertText("  ");
+        }
+        else
+            currentBlock = currentBlock.next();
+        qDebug() << "Block Ends";
     }
 }

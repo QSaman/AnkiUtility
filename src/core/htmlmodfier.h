@@ -2,6 +2,7 @@
 #define HTMLMODFIER_H
 
 #include <QTextCharFormat>
+#include <QTextBlock>
 
 class QString;
 class QTextImageFormat;
@@ -25,6 +26,7 @@ public:
     QString normalizeHtml(QString & htmlString);
     //Notice: I don't need to use below function in openSUSE. I use it in Fedora 19
     QString removeTagAttributes(QString tagName, QString htmlString);
+    QString removeImageLink(QString imageString, QString htmlString);
     bool convertImageToText(QTextCursor & textCursor);
     void changeFontStretch(QTextDocument * document, int fontStretch);
     Q_DECLARE_FLAGS(TextFragments, TextFragment)
@@ -34,6 +36,7 @@ private:
     void modifyFontSize();
     void modifyFont(HtmlModifier::TextFragments tf, QTextCharFormat charFormat, int fragmentStartPosition, int fragmentEndPosition);
     void modifyImage(HtmlModifier::TextFragments tf, QTextCharFormat charFormat, int fragmentStartPosition, int fragmentEndPosition);
+    bool removeImage(QTextCharFormat charFormat, QTextBlock::Iterator & iter, int fragmentStartPosition, int fragmentEndPosition);
     void indentLine(const QString &imageName, int &fragmentStartPositin, int &fragmentEndPosition);   //both input integer will be modified by function    
 
     QTextDocument * textDocument;
