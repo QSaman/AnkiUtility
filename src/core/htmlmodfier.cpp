@@ -113,16 +113,17 @@ void HtmlModifier::changeFontStretch(QTextDocument *document, int fontStretch)
 void HtmlModifier::modifyFont(HtmlModifier::TextFragments tf, QTextCharFormat charFormat, int fragmentStartPosition, int fragmentEndPosition)
 {
     QFont font = charFormat.font();
-    //qDebug() << var(font.pixelSize()) << " - " << var(font.pointSize());
-    //qDebug() << "******************************************";
+//    qDebug() << var(font.pixelSize()) << " - " << var(font.pointSize());
+//    qDebug() << "******************************************";
     if (tf & HtmlModifier::RemoveHyperLink && charFormat.isAnchor())
         charFormat.setAnchor(false);
     if (tf & HtmlModifier::ModifyFontPointSize)
     {
-        if ((font.pixelSize() == 13 || font.pixelSize() == 14) && font.pointSize() == -1)
-            font.setPointSize(14);
-        else if (font.pixelSize() == -1 && font.pointSize() == 11)
-            font.setPointSize(16);
+        font.setPointSize(16);
+//        if ((font.pixelSize() == 13 || font.pixelSize() == 14) && font.pointSize() == -1)
+//            font.setPointSize(14);
+//        else if (font.pixelSize() == -1 && font.pointSize() == 11)
+//            font.setPointSize(16);
     }
     else if (tf & HtmlModifier::ModifyFontStretch)
     {
