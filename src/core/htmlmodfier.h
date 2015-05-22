@@ -29,6 +29,7 @@ public:
     QString removeImageLink(QString imageString, QString htmlString);
     bool convertImageToText(QTextCursor & textCursor);
     void changeFontStretch(QTextDocument * document, int fontStretch);
+    static int getTextMinFontSize(QTextDocument* document);
     Q_DECLARE_FLAGS(TextFragments, TextFragment)
 private:
     void modifyTextFragments(HtmlModifier::TextFragments tf);
@@ -41,6 +42,7 @@ private:
 
     QTextDocument * textDocument;
     int _fontStretch;
+    int minFontSize;
     static const QString replacingString;
 };
 

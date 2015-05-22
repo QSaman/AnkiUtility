@@ -18,6 +18,7 @@ const QString HtmlModifier::replacingString = "30fb;";  //KATAKANA MIDDLE DOT
 
 HtmlModifier::HtmlModifier()
 {
+    minFontSize = 16;
 }
 
 //Notice: I don't need to use below function in openSUSE. I use it in Fedora 19
@@ -60,6 +61,7 @@ QString HtmlModifier::normalizeHtml(QString &htmlString)
     textDocument->setHtml(htmlString);
     //textDocument->setDefaultStyleSheet(".dsl_opt { display: inline; }");
     //qDebug() << var(textDocument->toHtml());
+    minFontSize = getTextMinFontSize(textDocument);
     modifyTextFragments(HtmlModifier::ModifyImage | HtmlModifier::ModifyFontPointSize | HtmlModifier::IndentExamples | HtmlModifier::RemoveHyperLink);
     modifyText();
     QString ret = textDocument->toHtml();
@@ -112,18 +114,21 @@ void HtmlModifier::changeFontStretch(QTextDocument *document, int fontStretch)
 
 void HtmlModifier::modifyFont(HtmlModifier::TextFragments tf, QTextCharFormat charFormat, int fragmentStartPosition, int fragmentEndPosition)
 {
-    QFont font = charFormat.font();
+    int delta = 0;
+    if (minFontSize < 16)
+        delta = 16 - minFontSize;
+    QFont font = charFormat.font();    
 //    qDebug() << var(font.pixelSize()) << " - " << var(font.pointSize());
 //    qDebug() << "******************************************";
     if (tf & HtmlModifier::RemoveHyperLink && charFormat.isAnchor())
         charFormat.setAnchor(false);
     if (tf & HtmlModifier::ModifyFontPointSize)
     {
-        font.setPointSize(16);
-//        if ((font.pixelSize() == 13 || font.pixelSize() == 14) && font.pointSize() == -1)
-//            font.setPointSize(14);
-//        else if (font.pixelSize() == -1 && font.pointSize() == 11)
-//            font.setPointSize(16);
+        int size = font.pixelSize();
+        if (size < 0)
+            size = font.pointSize();
+        //qDebug() << var(size + delta);
+        font.setPointSize(size + delta);
     }
     else if (tf & HtmlModifier::ModifyFontStretch)
     {
@@ -206,6 +211,29 @@ void HtmlModifier::modifyImage(HtmlModifier::TextFragments tf, QTextCharFormat c
             break;
         }
     }
+}
+
+int HtmlModifier::getTextMinFontSize(QTextDocument* document)
+{
+    QTextBlock currentBlock = document->begin();
+    int min = 16;
+    for (; currentBlock.isValid(); currentBlock = currentBlock.next())
+    {
+        QTextBlock::iterator iter;
+        for (iter = currentBlock.begin(); iter != currentBlock.end(); ++iter)
+        {
+            QTextFragment currentFragment = iter.fragment();
+            if (!currentFragment.isValid())
+                continue;
+            QTextCharFormat charFormat = currentFragment.charFormat();
+            int size = charFormat.font().pixelSize();
+            if (size < 0)
+                size = charFormat.font().pointSize();
+            if (size < min && size > 0)
+                min = size;
+        }
+    }
+    return min;
 }
 
 void HtmlModifier::modifyTextFragments(HtmlModifier::TextFragments tf)
