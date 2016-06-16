@@ -1,0 +1,3 @@
+# AnkiUtility
+A simple program to help enjoy more when using Anki!
+You copy and paste from GoldenDict to this program and then copy the final result to Anki. It handles some boring stuff. For example: Remove some pictures, convert dictionary numbers which are images to text, change font size, Remove dictionary hyperlink, indent examples and...
